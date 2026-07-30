@@ -324,7 +324,9 @@ export default function ThreeSeaBottle({
           enabled={activeWishIdx === null}
         />
 
-        <Environment preset="studio" />
+        <directionalLight position={[5, 12, 5]} intensity={1.5 * lightIntensity} color="#D4AF37" />
+        <directionalLight position={[-5, 8, -5]} intensity={0.8 * lightIntensity} color="#EC4899" />
+        <directionalLight position={[0, 10, 10]} intensity={0.5 * lightIntensity} color="#ffffff" />
       </Canvas>
     </div>
   );

@@ -38,7 +38,7 @@ export default function AudioPlayer() {
 
   return (
     <>
-      <audio ref={audioRef} loop>
+      <audio ref={audioRef} loop preload="none">
         <source src="https://cdn.pixabay.com/download/audio/2022/05/16/audio_01b0f59a93.mp3?filename=cinematic-time-lapse-115672.mp3" type="audio/mpeg" />
       </audio>
       

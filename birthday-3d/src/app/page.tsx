@@ -11,6 +11,16 @@ import { useMicBlow } from "../hooks/useMicBlow";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { Settings, Share2, X, Sparkles, Check, Info, MessageSquare } from "lucide-react";
+import { Suspense } from "react";
+
+function CanvasLoader() {
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/45 backdrop-blur-sm z-30">
+      <div className="w-8 h-8 border-4 border-goldAccent/30 border-t-goldAccent rounded-full animate-spin mb-4"></div>
+      <span className="text-[10px] font-mono text-goldAccent tracking-widest uppercase animate-pulse">Initializing 3D Space...</span>
+    </div>
+  );
+}
 
 export default function Home() {
   // 1. Core Configurable States
@@ -513,17 +523,18 @@ export default function Home() {
               <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-goldAccent rounded-bl-3xl"></div>
               <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-goldAccent rounded-br-3xl"></div>
 
-              {/* Large, Beautiful 3D Sea Viewport */}
               <div className="w-full relative h-[420px] sm:h-[580px] lg:h-[650px] z-0">
-                <ThreeSeaBottle
-                  wishes={classmateWishes}
-                  lightIntensity={lightIntensity}
-                  waveSpeed={waveSpeed}
-                  onSelectWish={handleSelectWish}
-                  openedList={openedList}
-                  setOpenedList={setOpenedList}
-                  activeWishIdx={activeWish ? activeWish.idx : null}
-                />
+                <Suspense fallback={<CanvasLoader />}>
+                  <ThreeSeaBottle
+                    wishes={classmateWishes}
+                    lightIntensity={lightIntensity}
+                    waveSpeed={waveSpeed}
+                    onSelectWish={handleSelectWish}
+                    openedList={openedList}
+                    setOpenedList={setOpenedList}
+                    activeWishIdx={activeWish ? activeWish.idx : null}
+                  />
+                </Suspense>
 
                 {/* Wish Card Scroll Overlay */}
                 <AnimatePresence>
@@ -717,8 +728,10 @@ export default function Home() {
           </section>
 
           {/* Section 4.5: Large Still 3D Cake (Decorative) */}
-          <section className="py-16 px-4 flex flex-col items-center justify-center text-center border-t border-white/5 bg-black/10 z-10 relative">
-            <ThreeCakeBottom />
+          <section className="py-16 px-4 flex flex-col items-center justify-center text-center border-t border-white/5 bg-black/10 z-10 relative min-h-[360px]">
+            <Suspense fallback={<CanvasLoader />}>
+              <ThreeCakeBottom />
+            </Suspense>
           </section>
 
           {/* Section 5: Reset / Replay */}

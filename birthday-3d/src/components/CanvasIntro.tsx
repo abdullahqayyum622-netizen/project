@@ -231,7 +231,8 @@ export default function CanvasIntro({
         <fog attach="fog" args={["#010103", 5, 18]} />
         <ambientLight intensity={0.6} />
         <spotLight position={[5, 12, 5]} angle={0.25} penumbra={1} intensity={12} />
-        <spotLight position={[-5, 8, -5]} angle={0.25} penumbra={1} intensity={6} color="#EC4899" />
+        <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
+        <directionalLight position={[-5, 5, -5]} intensity={0.5} />
 
         <GiftBox onOpen={handleOpen} />
 
@@ -239,8 +240,6 @@ export default function CanvasIntro({
           <planeGeometry args={[100, 100]} />
           <meshStandardMaterial color="#050505" roughness={0.15} metalness={0.9} />
         </mesh>
-
-        <Environment preset="studio" />
       </Canvas>
     </motionDOM.div>
   );
