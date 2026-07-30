@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-deepBlack: #070707;
+  --color-darkNavy: #0F172A;
+  --color-purpleGlow: #6D28D9;
+  --color-pinkGlow: #EC4899;
+  --color-goldAccent: #FACC15;
+
+  --color-obsidian: #0A0A0A;
+  --color-satinGold: #D4AF37;
+  --color-champagne: #F7E7CE;
+  --color-roseGold: #B76E79;
+
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+  --font-script: var(--font-script);
+}
+
+:root {
+  --background: #050505;
+  --foreground: #ffffff;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Base Glassmorphism */
+@utility glass-card {
+  background: rgba(10, 10, 10, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Luxe Card Style */
+@utility luxury-card {
+  background: rgba(10, 10, 10, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(212, 175, 55, 0.05);
+}
+
+/* 3D Holographic UI Panel */
+@utility holographic-panel {
+  background: rgba(10, 10, 10, 0.65);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.08), inset 0 0 15px rgba(212, 175, 55, 0.08);
+  border-radius: 12px;
+}
+
+/* Hide default cursor inside 3D Canvas when custom cursor is active */
+.custom-cursor-active canvas {
+  cursor: none !important;
+}
+
