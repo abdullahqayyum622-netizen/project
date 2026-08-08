@@ -23,9 +23,23 @@ const soundBtn = document.getElementById("sound-btn");
 const ambientMusic = document.getElementById("ambient-music");
 
 // Config
-const frameCount = 480;
-const frames = [];
-let loadedCount = 0;
+const frameCount = 240;
+const frames = new Array(frameCount);
+const loadedFrames = new Array(frameCount).fill(false);
+
+const priorityFrames = new Set();
+// Load first 15 frames for immediate initial display
+for (let i = 0; i < 15; i++) {
+    priorityFrames.add(i);
+}
+// Add keyframes every 10 frames across the remaining timeline
+for (let i = 20; i < frameCount; i += 10) {
+    priorityFrames.add(i);
+}
+priorityFrames.add(frameCount - 1); // Ensure last frame is included
+
+let priorityLoadedCount = 0;
+let experienceStarted = false;
 let currentFrameIndex = 0;
 let targetFrameIndex = 0;
 
@@ -39,23 +53,85 @@ function getFramePath(index) {
     return `assets/frames/frame_${paddedIndex}.jpg`;
 }
 
-// Preload Images
+// Preload Images (Progressive Strategy)
 function preloadImages() {
+    // Initialize image objects for all frames first so they exist in array
     for (let i = 0; i < frameCount; i++) {
+        if (!priorityFrames.has(i)) {
+            frames[i] = null;
+        }
+    }
+    
+    // First, load all priority frames in parallel
+    priorityFrames.forEach(index => {
         const img = new Image();
-        img.src = getFramePath(i);
+        img.src = getFramePath(index);
         img.onload = () => {
-            loadedCount++;
-            const percent = Math.floor((loadedCount / frameCount) * 100);
-            progressBar.style.width = `${percent}%`;
-            progressText.innerText = `${percent}% loaded`;
+            frames[index] = img;
+            loadedFrames[index] = true;
+            priorityLoadedCount++;
             
-            if (loadedCount === frameCount) {
-                // Initialize after loading completes
-                setTimeout(startExperience, 800);
+            // Only update progress bar based on priority frames to show fast progress
+            if (!experienceStarted) {
+                const percent = Math.min(100, Math.floor((priorityLoadedCount / priorityFrames.size) * 100));
+                progressBar.style.width = `${percent}%`;
+                progressText.innerText = `Loading magic... ${percent}%`;
+                
+                if (priorityLoadedCount === priorityFrames.size) {
+                    experienceStarted = true;
+                    setTimeout(startExperience, 400);
+                    // Start background loading of all remaining frames
+                    loadRemainingFrames();
+                }
             }
         };
-        frames.push(img);
+        img.onerror = () => {
+            loadedFrames[index] = true; // Avoid block on error
+            priorityLoadedCount++;
+            if (!experienceStarted && priorityLoadedCount === priorityFrames.size) {
+                experienceStarted = true;
+                setTimeout(startExperience, 400);
+                loadRemainingFrames();
+            }
+        };
+    });
+}
+
+// Load remaining non-priority frames in the background
+async function loadRemainingFrames() {
+    const queue = [];
+    for (let i = 0; i < frameCount; i++) {
+        if (!priorityFrames.has(i)) {
+            queue.push(i);
+        }
+    }
+    
+    // Process queue in small chunks of concurrent downloads (concurrency of 4)
+    const concurrency = 4;
+    let indexInQueue = 0;
+    
+    async function loadNext() {
+        if (indexInQueue >= queue.length) return;
+        const currentIdx = queue[indexInQueue++];
+        
+        await new Promise((resolve) => {
+            const img = new Image();
+            img.src = getFramePath(currentIdx);
+            img.onload = () => {
+                frames[currentIdx] = img;
+                loadedFrames[currentIdx] = true;
+                resolve();
+            };
+            img.onerror = () => {
+                resolve();
+            };
+        });
+        
+        loadNext();
+    }
+    
+    for (let c = 0; c < concurrency; c++) {
+        loadNext();
     }
 }
 
@@ -72,8 +148,28 @@ function startExperience() {
 
 // Draw Frame with Object-Fit Cover Logic
 function renderFrame(index) {
-    const img = frames[Math.floor(index)];
-    if (!img || !img.complete) return;
+    const targetIdx = Math.floor(index);
+    let img = frames[targetIdx];
+    
+    // Fallback to nearest loaded frame if current frame isn't ready
+    if (!img || !loadedFrames[targetIdx]) {
+        let bestDistance = Infinity;
+        let fallbackIdx = -1;
+        for (let i = 0; i < frameCount; i++) {
+            if (loadedFrames[i] && frames[i]) {
+                const distance = Math.abs(i - targetIdx);
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    fallbackIdx = i;
+                }
+            }
+        }
+        if (fallbackIdx !== -1) {
+            img = frames[fallbackIdx];
+        } else {
+            return;
+        }
+    }
     
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
@@ -182,9 +278,9 @@ function updateUIElements(frameIndex) {
         }
     });
 
-    // 4. Hotspot Visibilities based on specific Frame Sections (scaled for 480 frames)
-    // Lake and Bridge hotspots appear in Phase 1 (0 to 120 frames)
-    if (frameIndex >= 10 && frameIndex <= 105) {
+    // 4. Hotspot Visibilities based on specific Frame Sections (scaled for 240 frames)
+    // Lake and Bridge hotspots appear in Phase 1 (0 to 60 frames)
+    if (frameIndex >= 5 && frameIndex <= 53) {
         hotspotLake.classList.add("visible");
         hotspotBridge.classList.add("visible");
     } else {
@@ -192,15 +288,15 @@ function updateUIElements(frameIndex) {
         hotspotBridge.classList.remove("visible");
     }
     
-    // Palace gates hotspot appears in Phase 2 (120 to 240 frames)
-    if (frameIndex >= 125 && frameIndex <= 225) {
+    // Palace gates hotspot appears in Phase 2 (60 to 120 frames)
+    if (frameIndex >= 63 && frameIndex <= 113) {
         hotspotPalace.classList.add("visible");
     } else {
         hotspotPalace.classList.remove("visible");
     }
     
-    // Palace interior hotspot appears in Phase 3 (240 to 360 frames)
-    if (frameIndex >= 245 && frameIndex <= 345) {
+    // Palace interior hotspot appears in Phase 3 (120 to 180 frames)
+    if (frameIndex >= 123 && frameIndex <= 173) {
         hotspotInterior.classList.add("visible");
     } else {
         hotspotInterior.classList.remove("visible");

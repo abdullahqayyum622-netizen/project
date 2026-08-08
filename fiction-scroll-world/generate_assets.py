@@ -345,18 +345,18 @@ def compile_video_and_extract_frames():
     sizes = [img.size for img in images]
     print(f"Loaded {len(images)} source images.")
     
-    # 480 FRAMES (10 SECONDS PER PHASE AT 12 FPS)
-    num_frames = 480
-    target_size = (1280, 720)
+    # 240 FRAMES (5 SECONDS PER PHASE AT 12 FPS)
+    num_frames = 240
+    target_size = (960, 540)
     
     # --- STEP 1: Generate Raw Animated Frames ---
     print(f"Generating {num_frames} raw animated frames with rich visual effects...")
     temp_paths = []
     for i in range(num_frames):
-        # 4 phases of 120 frames each
-        if i < 120:
+        frames_per_phase = num_frames // 4
+        if i < frames_per_phase:
             phase = 1
-            t = i / 120.0
+            t = i / float(frames_per_phase)
             z0 = 1.0 + (2.5 - 1.0) * t
             c0 = (sizes[0][0] * 0.50, sizes[0][1] * 0.40)
             img0_frame = get_cropped_resized(images[0], c0, z0, target_size)
@@ -364,12 +364,15 @@ def compile_video_and_extract_frames():
             z1 = 1.0 + (1.2 - 1.0) * t
             c1 = (sizes[1][0] * 0.50, sizes[1][1] * 0.50)
             img1_frame = get_cropped_resized(images[1], c1, z1, target_size)
-            alpha = 0.0 if i < 80 else (i - 80) / 40.0
+            
+            trans_start = int(frames_per_phase * 0.67)
+            trans_len = frames_per_phase - trans_start
+            alpha = 0.0 if i < trans_start else (i - trans_start) / float(trans_len)
             frame = Image.blend(img0_frame, img1_frame, alpha)
             
-        elif i < 240:
+        elif i < 2 * frames_per_phase:
             phase = 2
-            t = (i - 120) / 120.0
+            t = (i - frames_per_phase) / float(frames_per_phase)
             z1 = 1.2 + (2.6 - 1.2) * t
             c1 = (sizes[1][0] * 0.50, sizes[1][1] * 0.50)
             img1_frame = get_cropped_resized(images[1], c1, z1, target_size)
@@ -377,12 +380,15 @@ def compile_video_and_extract_frames():
             z2 = 0.9 + (1.2 - 0.9) * t
             c2 = (sizes[2][0] * 0.50, sizes[2][1] * 0.50)
             img2_frame = get_cropped_resized(images[2], c2, z2, target_size)
-            alpha = 0.0 if i < 200 else (i - 200) / 40.0
+            
+            trans_start = frames_per_phase + int(frames_per_phase * 0.67)
+            trans_len = frames_per_phase - int(frames_per_phase * 0.67)
+            alpha = 0.0 if i < trans_start else (i - trans_start) / float(trans_len)
             frame = Image.blend(img1_frame, img2_frame, alpha)
             
-        elif i < 360:
+        elif i < 3 * frames_per_phase:
             phase = 3
-            t = (i - 240) / 120.0
+            t = (i - 2 * frames_per_phase) / float(frames_per_phase)
             z2 = 1.2 + (2.5 - 1.2) * t
             c2 = (sizes[2][0] * 0.50, sizes[2][1] * 0.35)
             img2_frame = get_cropped_resized(images[2], c2, z2, target_size)
@@ -390,12 +396,15 @@ def compile_video_and_extract_frames():
             z3 = 1.0 + (1.1 - 1.0) * t
             c3 = (sizes[3][0] * 0.50, sizes[3][1] * 0.50)
             img3_frame = get_cropped_resized(images[3], c3, z3, target_size)
-            alpha = 0.0 if i < 320 else (i - 320) / 40.0
+            
+            trans_start = 2 * frames_per_phase + int(frames_per_phase * 0.67)
+            trans_len = frames_per_phase - int(frames_per_phase * 0.67)
+            alpha = 0.0 if i < trans_start else (i - trans_start) / float(trans_len)
             frame = Image.blend(img2_frame, img3_frame, alpha)
             
         else:
             phase = 4
-            t = (i - 360) / 119.0
+            t = (i - 3 * frames_per_phase) / float(frames_per_phase - 1)
             z3 = 1.1 + (1.3 - 1.1) * t
             c3 = (sizes[3][0] * (0.50 - 0.05 * t), sizes[3][1] * (0.50 - 0.05 * t))
             frame = get_cropped_resized(images[3], c3, z3, target_size)
@@ -403,7 +412,7 @@ def compile_video_and_extract_frames():
         animated_frame = animate_frame_effects(frame, i, phase)
         temp_name = f"temp_{i:03d}.jpg"
         temp_path = os.path.join(temp_frames_dir, temp_name)
-        animated_frame.save(temp_path, "JPEG", quality=95)
+        animated_frame.save(temp_path, "JPEG", quality=75)
         temp_paths.append(temp_path)
         
     print("Raw frames generated.")
