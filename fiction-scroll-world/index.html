@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elysium - The Celestial Princess Kingdom</title>
+    <link rel="stylesheet" href="index.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Montserrat:wght@200;400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <script>
+        // Global error console logger to help debug
+        window.onerror = function(message, source, lineno, colno, error) {
+            const errDiv = document.createElement('div');
+            errDiv.style.position = 'fixed';
+            errDiv.style.bottom = '10px';
+            errDiv.style.left = '10px';
+            errDiv.style.background = 'rgba(255, 0, 0, 0.9)';
+            errDiv.style.color = 'white';
+            errDiv.style.padding = '15px';
+            errDiv.style.borderRadius = '5px';
+            errDiv.style.zIndex = '100000';
+            errDiv.style.fontFamily = 'monospace';
+            errDiv.style.fontSize = '12px';
+            errDiv.style.maxWidth = '90vw';
+            errDiv.style.whiteSpace = 'pre-wrap';
+            errDiv.style.pointerEvents = 'none';
+            errDiv.innerHTML = `<strong>JS Error:</strong> ${message}<br>at ${source}:${lineno}:${colno}`;
+            document.body.appendChild(errDiv);
+            return false;
+        };
+    </script>
+
+    <!-- Welcome Back Greeting Banner -->
+    <div id="greeting-banner" class="greeting-overlay-card">
+        <span class="greeting-symbol">✦</span>
+        <div class="greeting-content">
+            <h2 class="greeting-text">Welcome back, Muziha Nayyab</h2>
+            <p class="greeting-subtext">Safe travels from Karachi. Welcome back to Chakwal! 💼✨</p>
+        </div>
+        <span class="greeting-symbol">✦</span>
+    </div>
+
+    <!-- Preloader -->
+    <div id="loader" class="loader-overlay">
+        <div class="loader-content">
+            <h1 class="loader-title">ELYSIUM</h1>
+            <p class="loader-subtitle">Preparing your passage to the celestial kingdom...</p>
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <span id="progress-text" class="progress-text">0% loaded</span>
+        </div>
+    </div>
+
+    <!-- Background Canvas for Scroll-Scrubbing -->
+    <canvas id="scroll-canvas"></canvas>
+
+    <!-- Sparkle Canvas Overlay -->
+    <canvas id="sparkle-canvas"></canvas>
+
+    <!-- Audio / Music Controller -->
+    <button id="sound-btn" class="hud-btn sound-btn" aria-label="Toggle Soundtrack">
+        <div class="visualizer-bars">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+        <span>Soundtrack Off</span>
+    </button>
+
+    <!-- Main HUD Overlay -->
+    <div class="hud-layer">
+        <!-- Top Telemetry -->
+        <header class="hud-header">
+            <div class="hud-logo">
+                <span class="logo-accent">✦</span> ELYSIUM <span class="logo-accent">✦</span>
+            </div>
+
+        </header>
+
+        <!-- Right Side Nav / Scroll Indicator -->
+        <div class="hud-scrollbar">
+            <div class="scrollbar-track">
+                <div id="scrollbar-thumb" class="scrollbar-thumb"></div>
+            </div>
+            <div class="scrollbar-labels">
+                <span class="scroll-label" data-target="0">Lagoon</span>
+                <span class="scroll-label" data-target="25">Gates</span>
+                <span class="scroll-label" data-target="50">Interior</span>
+                <span class="scroll-label" data-target="75">Sky</span>
+            </div>
+        </div>
+
+        <!-- Interactive Hotspots (Absolute overlay) -->
+        <div id="hotspot-lake" class="hotspot" style="top: 60%; left: 35%;">
+            <div class="hotspot-ring"></div>
+            <div class="hotspot-dot"></div>
+            <div class="hotspot-card">
+                <h3>Homecoming Lake</h3>
+                <p>A beautiful amethyst lake welcoming Muziha Nayyab back to Chakwal from Karachi.</p>
+            </div>
+        </div>
+
+        <div id="hotspot-bridge" class="hotspot" style="top: 55%; left: 55%;">
+            <div class="hotspot-ring"></div>
+            <div class="hotspot-dot"></div>
+            <div class="hotspot-card">
+                <h3>The Span of Partnership</h3>
+                <p>Symbolizing the strong bridge of our class fellowship and business ventures going forward.</p>
+            </div>
+        </div>
+
+        <div id="hotspot-palace" class="hotspot" style="top: 35%; left: 50%;">
+            <div class="hotspot-ring"></div>
+            <div class="hotspot-dot"></div>
+            <div class="hotspot-card">
+                <h3>Gates of Opportunity</h3>
+                <p>Opening wide to welcome back my class fellow and business partner for new projects.</p>
+            </div>
+        </div>
+
+        <div id="hotspot-interior" class="hotspot" style="top: 45%; left: 70%;">
+            <div class="hotspot-ring"></div>
+            <div class="hotspot-dot"></div>
+            <div class="hotspot-card">
+                <h3>Chandelier & Fountain</h3>
+                <p>The glittering crystal chandelier (jumar) hanging above the beautiful starlight fountain.</p>
+            </div>
+        </div>
+
+        <!-- Navigation/Instruction Overlay at bottom -->
+        <footer class="hud-footer">
+            <div class="instruction">
+                <i class="fa-solid fa-angles-down animated-bounce"></i> Scroll down to traverse the realm
+            </div>
+        </footer>
+    </div>
+
+    <div class="scroll-container">
+        <!-- Section 1: The Violet Lagoon -->
+        <section class="scroll-section" id="section-lake">
+            <div class="content-card">
+                <h2>A Journey of Return</h2>
+                <hr class="card-divider">
+                <p>Welcome back to Chakwal, Muziha! Your return from Karachi completes our circle once again, bringing fresh energy and inspiration back to our class and our business ventures.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: The Palace Gates -->
+        <section class="scroll-section" id="section-gates">
+            <div class="content-card">
+                <h2>Partnership & Ambition</h2>
+                <hr class="card-divider">
+                <p>As we open the gates to new horizons, we celebrate the incredible drive and partnership we share. Every step we take, whether in studies or business, is stronger with you back by my side.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: The Throne Hall -->
+        <section class="scroll-section" id="section-interior">
+            <div class="content-card">
+                <h2>The Chandelier & Fountain</h2>
+                <hr class="card-divider">
+                <p>Look up at the glittering chandelier (jumar) and watch the starlight fountain spray. Just like this glowing palace, your presence adds brilliance to our team projects and enterprise goals.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: The Celestial Canopy -->
+        <section class="scroll-section" id="section-sky">
+            <div class="content-card">
+                <h2>Reaching New Heights</h2>
+                <hr class="card-divider">
+                <p>From the streets of Chakwal to the highest skies, our shared dreams and business ambitions know no bounds. Together, we are building a path of success that reaches the stars.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: End -->
+        <section class="scroll-section" id="section-end">
+            <div class="content-card">
+                <h2>Welcome Back, Partner!</h2>
+                <hr class="card-divider">
+                <p>Elysium stands complete now that you've returned. Here's to making waves in the classroom and conquering new business horizons together in Chakwal!</p>
+                <button class="restart-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+                    <i class="fa-solid fa-rotate-left"></i> Ascend to Start
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Ambient audio context -->
+    <audio id="ambient-music" loop>
+        <source src="https://assets.mixkit.co/music/preview/mixkit-dreaming-big-31.mp3" type="audio/mpeg">
+    </audio>
+
+
+
+    <script src="app.js"></script>
+</body>
+</html>
